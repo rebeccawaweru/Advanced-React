@@ -25,27 +25,24 @@ const LandingSection = () => {
     initialValues: {
       firstName:"",
       email:"",
-      type:"",
+      type:"hireMe",
       comment:""
     },
     onSubmit: async (values) => {
-      try {
-        await submit(values);
-        onOpen("success", `Thanks for your submission ${values.firstName}, we will get back to you shortly!`);
-      } catch (error) {
-        onOpen("error", "Something went wrong, please try again later!");
-      }
+      await submit('https://john.com/contactme', values);
       formik.resetForm();
-   
     },
     validationSchema: Yup.object({
       firstName: Yup.string().required('Required'),
-      email: Yup.string().email('Invalid email').required('Required'),
+      email: Yup.string().email('Invalid email address').required('Required'),
       type: Yup.string().required('Required'),
-      comment: Yup.string().required('Required')
+      comment: Yup.string().required('Required').min(25, "Must be at least 25 characters")
     }),
   });
-
+  useEffect(() =>{
+    response ? onOpen(response.type, response.message) : null;
+    response && response.type === 'success' ? formik.resetForm() : null
+  },[response]);
   return (
     <FullScreenSection
       isDarkBackground
@@ -64,11 +61,7 @@ const LandingSection = () => {
                 <FormLabel htmlFor="firstName">Name</FormLabel>
                 <Input
                   id="firstName"
-                  name="firstName"
-                  type="text"
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  value={formik.values.firstName}
+                  {...formik.getFieldProps('firstName')}
                 />
                 <FormErrorMessage>
                   {formik.touched.firstName && formik.errors.firstName}
@@ -79,11 +72,7 @@ const LandingSection = () => {
                 <FormLabel htmlFor="email">Email Address</FormLabel>
                 <Input
                   id="email"
-                  name="email"
-                  type="email"
-                  onChange={formik.handleChange}
-                  value={formik.values.email}
-                  onBlur={formik.handleBlur}
+                  {...formik.getFieldProps('email')}
                 />
                 <FormErrorMessage>
                   {formik.touched.email && formik.errors.email}
@@ -92,7 +81,7 @@ const LandingSection = () => {
 
               <FormControl isInvalid={formik.touched.type && formik.errors.type}>
                 <FormLabel htmlFor="type">Type of enquiry</FormLabel>
-                <Select id="type" name="type" onChange={formik.handleChange} value={formik.values.type} onBlur={formik.handleBlur}>
+                <Select id="type" {...formik.getFieldProps('type')}>
                   <option value="hireMe">Freelance project proposal</option>
                   <option value="openSource">
                     Open source consultancy session
@@ -106,10 +95,7 @@ const LandingSection = () => {
                 <FormLabel htmlFor="comment">Your message</FormLabel>
                 <Textarea
                   id="comment"
-                  name="comment"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.comment}
+                  {...formik.getFieldProps("comment")}
                   height={250}
                 />
                 <FormErrorMessage>
